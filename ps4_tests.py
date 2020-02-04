@@ -185,7 +185,22 @@ class ps4_calc(unittest.TestCase):
 		print(calc_ci_95)
 		self.assertTrue(ci_95 - 0.1 < calc_ci_95 < ci_95 + 0.1, "Got incorrect population 95% CI {} instead of {}.".format(calc_ci_95, ci_95))
 
+class ps4_simple_bacteria(unittest.TestCase):
+	def test_bacteria_zero(self):
+		bacteria_zero = ps4.SimpleBacteria(0, 0)
+		self.assertFalse(bacteria_zero.is_killed(), "BacteriaZero is_killed returns True when expected False")
+		self.assertRaises(ps4.NoChildException, bacteria_zero.reproduce, 0)
+
+	def test_bacteria_max(self):
+		bacteria_max = ps4.SimpleBacteria(1, 1)
+		self.assertTrue(bacteria_max.is_killed(), "BacteriaMax is_killed returns False when expected True")
+		bacteria_rep = bacteria_max.reproduce(0)
+		self.assertTrue(bacteria_max.birth_prob == bacteria_rep.birth_prob, "bacteria_max birth_prob != bacteria_rep birth_prob")
+		self.assertTrue(bacteria_max.death_prob == bacteria_rep.death_prob, "bacteria_max death_prob != bacteria_rep death_prob")
+
+
 if __name__ == "__main__":
 	suite = unittest.TestSuite()
 	suite.addTest(unittest.makeSuite(ps4_calc))
+	suite.addTest(unittest.makeSuite(ps4_simple_bacteria))
 	unittest.TextTestRunner(verbosity=3).run(suite)
