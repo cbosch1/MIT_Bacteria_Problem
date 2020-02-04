@@ -88,7 +88,8 @@ class SimpleBacteria(object):
                 probability
             death_prob (float in [0, 1]): Maximum death probability
         """
-        pass  # TODO
+        self.birth_prob = birth_prob
+        self.death_prob = death_prob
 
     def is_killed(self):
         """
@@ -99,7 +100,12 @@ class SimpleBacteria(object):
         Returns:
             bool: True with probability self.death_prob, False otherwise.
         """
-        pass  # TODO
+        
+        if random.random() < self.death_prob:
+
+            return True
+
+        return False
 
     def reproduce(self, pop_density):
         """
@@ -127,7 +133,12 @@ class SimpleBacteria(object):
         Raises:
             NoChildException if this bacteria cell does not reproduce.
         """
-        pass  # TODO
+
+        if random.random() < self.birth_prob * (1 - pop_density):
+            
+            return SimpleBacteria(self.birth_prob, self.death_prob)
+
+        raise NoChildException()
 
 
 class Patient(object):
