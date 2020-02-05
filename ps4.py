@@ -153,7 +153,9 @@ class Patient(object):
             max_pop (int): Maximum possible bacteria population size for
                 this patient
         """
-        pass  # TODO
+        self.bacteria = bacteria
+        self.max_pop = max_pop
+
 
     def get_total_pop(self):
         """
@@ -162,7 +164,7 @@ class Patient(object):
         Returns:
             int: The total bacteria population
         """
-        pass  # TODO
+        return len(self.bacteria)
 
     def update(self):
         """
@@ -188,7 +190,34 @@ class Patient(object):
         Returns:
             int: The total bacteria population at the end of the update
         """
-        pass  # TODO
+        new_bacteria = []
+
+        #Check if any bacteria are killed this time step
+        for bacteria in self.bacteria:
+
+            if not bacteria.is_killed():
+
+                new_bacteria.append(bacteria)
+
+        #Calculate new population based on living bacteria
+        pop_dens = len(new_bacteria) / self.max_pop
+
+        #Attempt to reproduce
+        for bacteria in self.bacteria:
+
+            try:
+                
+                child = bacteria.reproduce(pop_dens)
+
+                new_bacteria.append(child)
+
+            except(NoChildException):
+
+                pass
+
+        self.bacteria = new_bacteria
+
+        return len(new_bacteria)
 
 
 ##########################
@@ -206,7 +235,13 @@ def calc_pop_avg(populations, n):
     Returns:
         float: The average bacteria population size at time step n
     """
-    pass  # TODO
+    trials_sum = 0
+
+    for trial in populations:
+
+        trials_sum += trial[n]
+
+    return trials_sum / len(populations)
 
 
 def simulation_without_antibiotic(num_bacteria,
@@ -242,11 +277,48 @@ def simulation_without_antibiotic(num_bacteria,
         populations (list of lists or 2D array): populations[i][j] is the
             number of bacteria in trial i at time step j
     """
-    pass  # TODO
+    culture = []
 
+    #Initialize starting bacteria
+    for n in range(1, num_bacteria):
+
+        bacteria = SimpleBacteria(birth_prob, death_prob)
+
+        culture.append(bacteria)
+
+    populations = []
+
+    #Start trials
+    for t in range(num_trials):
+
+        populations.append([])
+
+        bob = Patient(culture, max_pop)
+
+        total_pop = len(culture)
+
+        #Time steps within trials
+        for s in range(301):
+
+            populations[t].append(total_pop)
+
+            total_pop = bob.update()
+
+    #Cast avg pop into dictionary for plotting
+    plot = {}
+
+    for x in range(301):
+
+        float_x = float(x)
+
+        plot[float_x] = calc_pop_avg(populations, x)
+
+    make_one_curve_plot([*plot.keys()], [*plot.values()], "Time Step", "Avg Population", "Bob's Bacteria Trials")
+
+    return populations
 
 # When you are ready to run the simulation, uncomment the next line
-# populations = simulation_without_antibiotic(100, 1000, 0.1, 0.025, 50)
+populations = simulation_without_antibiotic(100, 1000, 0.1, 0.025, 50)
 
 ##########################
 # PROBLEM 3
