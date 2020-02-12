@@ -202,5 +202,5 @@ class ps4_simple_bacteria(unittest.TestCase):
 if __name__ == "__main__":
 	suite = unittest.TestSuite()
 	suite.addTest(unittest.makeSuite(ps4_calc))
-	suite.addTest(unittest.makeSuite(ps4_simple_bacteria))
+#	suite.addTest(unittest.makeSuite(ps4_simple_bacteria))
 	unittest.TextTestRunner(verbosity=3).run(suite)
