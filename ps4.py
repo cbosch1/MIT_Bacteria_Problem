@@ -322,8 +322,8 @@ def simulation_without_antibiotic(num_bacteria,
 
     return populations
 
-# When you are ready to run the simulation, uncomment the next line
-populations = simulation_without_antibiotic(100, 1000, 0.1, 0.025, 50)
+# # When you are ready to run the simulation, uncomment the next line
+# populations = simulation_without_antibiotic(100, 1000, 0.1, 0.025, 50)
 
 ##########################
 # PROBLEM 3
@@ -434,7 +434,7 @@ class ResistantBacteria(SimpleBacteria):
         """
         kill_prob = self.death_prob
 
-        if self.get_resistant():
+        if not self.get_resistant():
 
             kill_prob = kill_prob / 4
 
@@ -475,13 +475,11 @@ class ResistantBacteria(SimpleBacteria):
         """
         if random.random() < self.birth_prob * (1 - pop_density):
 
-            if self.get_resistant():
+            if self.get_resistant() or (random.random() > self.mut_prob * (1 - pop_density)):
 
                 return ResistantBacteria(self.birth_prob, self.death_prob, True, self.mut_prob)
 
-            new_mut_prob = self.mut_prob * (1 - pop_density)
-
-            return ResistantBacteria(self.birth_prob, self.death_prob, False, new_mut_prob)
+            return ResistantBacteria(self.birth_prob, self.death_prob, False, self.mut_prob)
 
         raise NoChildException()
 
@@ -603,7 +601,7 @@ class TreatedPatient(Patient):
 
         self.bacteria = culture
 
-        return len(new_bacteria)                    
+        return len(self.bacteria)                    
 
 
 ##########################
@@ -654,8 +652,74 @@ def simulation_with_antibiotic(num_bacteria,
             resistant_pop[i][j] is the number of resistant bacteria for
             trial i at time step j
     """
-    pass  # TODO
+    culture = []
 
+    #Initialize starting bacteria
+
+    for n in range(1, num_bacteria):
+
+        bacteria = ResistantBacteria(birth_prob, death_prob, resistant, mut_prob)
+
+        culture.append(bacteria)
+
+    populations = []
+
+    resistant_pop = []
+
+    #Per trial, initiate patient with bacteria
+    for t in range(num_trials):
+
+        populations.append([])
+
+        resistant_pop.append([])
+
+        bob = TreatedPatient(culture, max_pop)
+
+        total_pop = len(culture)
+
+        #Initiate no antibodies trial
+        for s in range(151):
+
+            populations[t].append(total_pop)
+
+            resistant_pop[t].append(bob.get_resist_pop())
+
+            total_pop = bob.update()
+
+        #Initiate antibody trial
+        bob.set_on_antibiotic()
+
+        for s in range(250):
+
+            populations[t].append(total_pop)
+
+            resistant_pop[t].append(bob.get_resist_pop())
+
+            total_pop = bob.update()
+
+        plot_1 = {}
+
+        plot_2 = {}
+
+        for x in range(401):
+
+            float_x = float(x)
+
+            plot_1[float_x] = calc_pop_avg(populations, x)
+
+            plot_2[float_x] = calc_pop_avg(resistant_pop, x)
+
+            
+        make_two_curve_plot([*plot_1.keys()], 
+                            [*plot_1.values()], 
+                            [*plot_2.values()], 
+                            "Non-resistant bacteria population", 
+                            "Resistant bacteria population", 
+                            "Time Step", 
+                            "Avg Population", 
+                            "Bob's Bacteria Trials")
+        
+        return (populations, resistant_pop)
 
 # When you are ready to run the simulations, uncomment the next lines one
 # at a time
